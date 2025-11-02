@@ -1,15 +1,15 @@
-#include <iostream>
-#include "mazeutil/prompt.h"
-#include <iomanip>
-#include "mazeutil/tessellate.h"
-#include "mazeutil/dfs.h"
-using namespace std;
+#include "control.h"
+#include "dfs.h"
+#include "maze.h"
+#include "tessellate.h"
 
+using namespace std;
+extern vector<vector<unsigned char>> maze;
 void clearScreen() {
 #ifdef _WIN32
     system("cls");
 #else
-    cout << "\033[2J\033[H" << flush;
+    std::cout << "\033[2J\033[H" << flush;
     system("clear");
 #endif
 }
@@ -28,8 +28,8 @@ MenuState mainmenu() {
 
 MenuState prompt_algorithm() {
     const vector<Option> options = {
-        {"Tessellation", TessellationSize},
         {"Randomized DFS", DFSSize},
+        {"Tessellation", TessellationSize},
         { "Wilson's Algorithm", WilsonSize},
         {"Go Back", MainMenu}
     };
@@ -71,10 +71,10 @@ MenuState prompt_size_dfs() {
     const MenuState end = menu.run(&size);
     clearScreen();
     if (end == Success) {
-        vector<vector<unsigned char>> v = maze_template(10*(size+1),10*(size+1));
-        dfs(v);
-        carve_openings_dfs(v);
-        print(v);
+        maze = maze_template(10*(size+1),10*(size+1));
+        dfs(maze);
+        carve_openings(maze);
+        print(maze);
     }
     return end;
 }
@@ -83,7 +83,7 @@ MenuState custom_size_dfs() {
     const vector<Option> options = {
         {"Go Back", AlgorithmMenu}
     };
-    Menu menu(30, options);
+    const Menu menu(30, options);
     menu.display();
     auto test = [](int a) { return a >= 1 && a <= 50; };
     const int width = customintInput("Select maze width (2-50): ", "Please select a number 2-50", test);
@@ -97,10 +97,10 @@ MenuState custom_size_dfs() {
         return DFSSize;
     }
     clearScreen();
-    vector<vector<unsigned char>> v = maze_template(width,height);
-    dfs(v);
-    carve_openings_dfs(v);
-    print(v);
+    maze = maze_template(width,height);
+    dfs(maze);
+    carve_openings(maze);
+    print(maze);
     return Success;
 }
 
@@ -120,7 +120,7 @@ MenuState prompt_size_wilson() {
     if (end == Success) {
         vector<vector<unsigned char>> v = maze_template(10*(size+1),10*(size+1));
         dfs(v);
-        carve_openings_dfs(v);
+        carve_openings(v);
         print(v);
     }
     return end;
@@ -253,7 +253,7 @@ void Menu::display () const {
     cout << "└" << Line("─", width) << "┘" << endl;
 }
 
-Menu::Menu( int width, const vector<Option>& options, const char* title ) {
+Menu::Menu(const int width, const vector<Option>& options, const char* title ) {
     this->title = title;
     this->width = width;
     this->options = options;

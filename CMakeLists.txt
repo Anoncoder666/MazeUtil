@@ -3,25 +3,24 @@ project(MazeUtil VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Include directory for headers
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-# Automatically find all .cpp files inside src/
-file(GLOB_RECURSE ALL_SRC CONFIGURE_DEPENDS src/*.cpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
+        src/*.cpp
+)
 
-# If you have a main.cpp file, make an executable from it
-# and link the rest as a library
-set(MAIN_FILE src/main.cpp)
-if(EXISTS ${MAIN_FILE})
-    list(REMOVE_ITEM ALL_SRC ${MAIN_FILE})
-    add_library(MazeUtilLib ${ALL_SRC})
-    target_include_directories(MazeUtilLib PUBLIC ${PROJECT_SOURCE_DIR}/include/mazeutil)
+list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/src/main.cpp")
+add_library(MazeUtilLib ${SOURCES})
+target_include_directories(MazeUtilLib PUBLIC ${PROJECT_SOURCE_DIR}/include/mazeutil)
 
-    add_executable(MazeUtil ${MAIN_FILE})
-    target_link_libraries(MazeUtil PRIVATE MazeUtilLib)
+add_executable(MazeUtil src/main.cpp)
+target_link_libraries(MazeUtil PRIVATE MazeUtilLib)
+
+if(MSVC)
+    target_compile_options(MazeUtil PRIVATE /W4 /permissive-)
 else()
-    # Fallback: just build everything as one executable
-    add_executable(MazeUtil ${ALL_SRC})
+    target_compile_options(MazeUtil PRIVATE -Wall -Wextra -Wpedantic -Wshadow -Wconversion -O2)
 endif()

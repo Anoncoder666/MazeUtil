@@ -1,8 +1,8 @@
-#include "mazeutil/tessellate.h"
+#include "tessellate.h"
 
-#include <algorithm>
+#include "maze.h"
+#include "rand.h"
 
-#include "mazeutil/rand.h"
 using namespace std;
 
 void generate_unit(vector<vector<unsigned char>>& v) {
@@ -48,36 +48,6 @@ void carve_internal_paths(vector<vector<unsigned char>> &v, const int iteration)
     }
 }
 
-void carve_openings_dfs(vector<vector<unsigned char>> &v, const int size) {
-    vector dir = {
-        Direction::UP,
-        Direction::DOWN,
-        Direction::LEFT,
-        Direction::RIGHT
-    };
-    ranges::shuffle(dir, rng);
-
-    dir.erase(dir.begin(), next(dir.begin(), 2));
-
-    int open = rand_int(1 << (size - 1)) * 2 - 1;
-
-    if (dir[0] == Direction::UP || dir[1] == Direction::UP) {
-        v[v.size() - 1][open] = false;
-        open = rand_int(1 << (size - 1)) * 2 - 1;
-    }
-    if (dir[0] == Direction::DOWN || dir[1] == Direction::DOWN) {
-        v[0][open] = false;
-        open = rand_int(1 << (size - 1)) * 2 - 1;
-    }
-    if (dir[0] == Direction::RIGHT || dir[1] == Direction::RIGHT) {
-        v[open][v.size() - 1] = false;
-        open = rand_int(1 << (size - 1)) * 2 - 1;
-    }
-    if (dir[0] == Direction::LEFT || dir[1] == Direction::LEFT) {
-        v[open][0] = false;
-    }
-}
-
 void tessellate(const int size) {
     assert(size > 0);
     vector<vector<unsigned char>> v;
@@ -86,6 +56,6 @@ void tessellate(const int size) {
         duplicate(v);
         carve_internal_paths(v, i);
     }
-    carve_openings_dfs(v, size);
+    carve_openings(v);
     print(v);
 }

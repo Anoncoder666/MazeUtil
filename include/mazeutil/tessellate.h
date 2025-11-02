@@ -3,6 +3,8 @@
 #define TESSELLATE_H
 #include <vector>
 #include <cassert>
+#include <algorithm>
+#include <vector>
 #include "render.h"
 
 using namespace std;

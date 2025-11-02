@@ -1,5 +1,5 @@
 #include <iostream>
-#include "mazeutil/prompt.h"
+#include "control.h"
 using namespace std;
 
 int main() {

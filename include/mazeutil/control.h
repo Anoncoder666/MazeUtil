@@ -1,6 +1,8 @@
 #ifndef PROMPT_H
 #define PROMPT_H
 #include <functional>
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 extern string bgcolor;
