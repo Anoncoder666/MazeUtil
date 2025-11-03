@@ -20,7 +20,7 @@ void duplicate(vector<vector<unsigned char>>& v) {
 }
 
 void carve_internal_paths(vector<vector<unsigned char>> &v, const int iteration) {
-    auto ignore = static_cast<Direction>(rand_int(4));
+    auto ignore = static_cast<Direction>(rand_int(4)-1);
 
     for (int j = 0; j < 4; j++) {
         const auto dir = static_cast<Direction>(j);
@@ -57,5 +57,5 @@ void tessellate(const int size) {
         carve_internal_paths(maze, i);
     }
     carve_openings(maze);
-    print(maze);
+    print_maze(maze);
 }
