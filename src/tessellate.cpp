@@ -4,7 +4,7 @@
 #include "rand.h"
 
 using namespace std;
-
+extern vector<vector<unsigned char>> maze;
 void generate_unit(vector<vector<unsigned char>>& v) {
     v= {{1, 1, 1}, {1, 0, 1},{1, 1, 1}};
 }
@@ -50,12 +50,12 @@ void carve_internal_paths(vector<vector<unsigned char>> &v, const int iteration)
 
 void tessellate(const int size) {
     assert(size > 0);
-    vector<vector<unsigned char>> v;
-    generate_unit(v);
+    std::vector<std::vector<unsigned char>>().swap(maze);
+    generate_unit(maze);
     for (int i = 0; i < size; i++) {
-        duplicate(v);
-        carve_internal_paths(v, i);
+        duplicate(maze);
+        carve_internal_paths(maze, i);
     }
-    carve_openings(v);
-    print(v);
+    carve_openings(maze);
+    print(maze);
 }

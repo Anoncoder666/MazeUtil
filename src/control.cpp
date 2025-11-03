@@ -2,6 +2,7 @@
 #include "dfs.h"
 #include "maze.h"
 #include "tessellate.h"
+#include "wilson.h"
 
 using namespace std;
 extern vector<vector<unsigned char>> maze;
@@ -91,7 +92,7 @@ MenuState custom_size_dfs() {
         clearScreen();
         return DFSSize;
     }
-    const int height = customintInput("Select maze width (2-50): ", "Please select a number 2-50", test);
+    const int height = customintInput("Select maze height (2-50): ", "Please select a number 2-50", test);
     if (height == 1) {
         clearScreen();
         return DFSSize;
@@ -105,7 +106,6 @@ MenuState custom_size_dfs() {
 }
 
 MenuState prompt_size_wilson() {
-    return MainMenu;
     const vector<Option> options = {
         {"10x10", Success},
         {"20x20", Success},
@@ -119,7 +119,7 @@ MenuState prompt_size_wilson() {
     clearScreen();
     if (end == Success) {
         vector<vector<unsigned char>> v = maze_template(10*(size+1),10*(size+1));
-        dfs(v);
+        wilson(v);
         carve_openings(v);
         print(v);
     }
@@ -138,7 +138,7 @@ MenuState custom_size_wilson() {
         clearScreen();
         return DFSSize;
     }
-    int height = customintInput("Select maze width (2-50): ", "Please select a number 2-50", test);
+    int height = customintInput("Select maze height (2-50): ", "Please select a number 2-50", test);
     if (height == 1) {
         clearScreen();
         return DFSSize;
@@ -201,7 +201,7 @@ MenuState color() {
             cout << "Color set to grey!" << endl;
             break;
         }
-        case 4: return Settings;
+        default: return Settings;
     }
     return Color;
 }

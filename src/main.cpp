@@ -4,7 +4,6 @@ using namespace std;
 
 int main() {
     MenuState state = MainMenu;
-
     while (state != Exit) {
         switch (state) {
             case MainMenu:
@@ -37,6 +36,7 @@ int main() {
             case Color:
                 state = color();
                 break;
+
         }
     }
 }

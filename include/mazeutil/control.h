@@ -3,7 +3,6 @@
 #include <functional>
 #include <iostream>
 #include <iomanip>
-
 using namespace std;
 extern string bgcolor;
 extern string fgcolor;

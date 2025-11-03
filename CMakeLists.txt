@@ -16,7 +16,8 @@ list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/src/main.cpp")
 add_library(MazeUtilLib ${SOURCES})
 target_include_directories(MazeUtilLib PUBLIC ${PROJECT_SOURCE_DIR}/include/mazeutil)
 
-add_executable(MazeUtil src/main.cpp)
+add_executable(MazeUtil src/main.cpp
+        include/mazeutil/hash.h)
 target_link_libraries(MazeUtil PRIVATE MazeUtilLib)
 
 if(MSVC)

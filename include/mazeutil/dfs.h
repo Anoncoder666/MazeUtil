@@ -9,6 +9,8 @@
 #include <queue>
 #include <cassert>
 
+#include "maze.h"
+
 using namespace std;
 
 bool traverse_dfs(vector<vector<unsigned char>> &v, vector<Direction> &directions, stack<Direction> &q, int& x, int& y);
