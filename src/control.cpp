@@ -30,8 +30,8 @@ MenuState mainmenu() {
 MenuState prompt_algorithm() {
     const vector<Option> options = {
         {"Randomized DFS", DFSSize},
-        {"Tessellation", TessellationSize},
         { "Wilson's Algorithm", WilsonSize},
+        {"Tessellation", TessellationSize},
         {"Go Back", MainMenu}
     };
     const Menu menu(30,options, "Choose an algorithm");
