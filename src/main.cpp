@@ -64,6 +64,9 @@ int main() {
             case Solve:
                 state = solve();
                 break;
+            case Solved:
+                state = solved();
+                break;
         }
     }
 }

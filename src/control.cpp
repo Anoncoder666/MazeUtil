@@ -76,11 +76,14 @@ MenuState prompt_size_dfs() {
     const MenuState end = menu.run(&size);
     clearScreen();
     if (end == Success) {
+
         maze = maze_template(10*(size+1),10*(size+1));
         dfs(maze);
+
         carve_openings(maze);
         print_maze(maze);
     }
+
     return end;
 }
 
@@ -110,6 +113,7 @@ MenuState custom_size_dfs() {
 }
 
 MenuState prompt_size_wilson() {
+
     const vector<Option> options = {
         {"10x10", Success},
         {"20x20", Success},
@@ -122,10 +126,10 @@ MenuState prompt_size_wilson() {
     const MenuState end = menu.run(&size);
     clearScreen();
     if (end == Success) {
-        vector<vector<unsigned char>> v = maze_template(10*(size+1),10*(size+1));
-        wilson(v);
-        carve_openings(v);
-        print_maze(v);
+        maze = maze_template(10*(size+1),10*(size+1));
+        wilson(maze);
+        carve_openings(maze);
+        print_maze(maze);
     }
     return end;
 }
@@ -238,7 +242,18 @@ int customintInput(const string& prompt, const string& errormsg, bool (*conditio
     }
     return choice;
 }
-
+MenuState solved() {
+    cout << "Good job! You solved the maze!" << endl;
+    const vector<Option> options = {
+            {"Generate New Maze", AlgorithmMenu},
+            {"Return to Main Menu", MainMenu},
+            {"Exit", Exit}
+    };
+    const Menu menu(30,options);
+    const MenuState end = menu.run();
+    clearScreen();
+    return end;
+}
 MenuState solve() {
 
     std::pair<int,int> location = maze_in;
@@ -246,17 +261,29 @@ MenuState solve() {
     auto& [y, x] = location; // structured binding references
     maze[y][x] = 2;
     maze[goal.first][goal.second] = 3;
-
+    bool reRender = true;
     while (location != goal) {
-        clearScreen();
-        cout << flush;
-        print_maze(maze);
-        switch (char move = getKey()) {
+        if (reRender) {
+            clearScreen();
+            cout << flush;
+            print_maze(maze);
+            reRender = false;
+        }
+        switch (char move = getNormalizedKey()) {
             case 'w':
             case 'W':
                 if (y > 0 && maze[y-1][x] == 0) { // move up
                     std::swap(maze[y-1][x], maze[y][x]);
                     y--;
+                    reRender = true;
+                }
+                else if (maze[y-1][x] == 3) {
+                    std::swap(maze[y-1][x], maze[y][x]);
+                    maze[y][x] = 0;
+                    y--;
+                    clearScreen();
+                    print_maze(maze);
+                    return Solved;
                 }
                 break;
 
@@ -265,6 +292,15 @@ MenuState solve() {
                 if (y < maze.size()-1 && maze[y+1][x] == 0) { // move down
                     std::swap(maze[y+1][x], maze[y][x]);
                     y++;
+                    reRender = true;
+                }
+                else if (maze[y+1][x] == 3) {
+                    std::swap(maze[y+1][x], maze[y][x]);
+                    maze[y][x] = 0;
+                    y++;
+                    clearScreen();
+                    print_maze(maze);
+                    return Solved;
                 }
                 break;
 
@@ -273,6 +309,15 @@ MenuState solve() {
                 if (x > 0 && maze[y][x-1] == 0) { // move left
                     std::swap(maze[y][x-1], maze[y][x]);
                     x--;
+                    reRender = true;
+                }
+                else if (maze[y][x-1] == 3) {
+                    std::swap(maze[y][x-1], maze[y][x]);
+                    maze[y][x] = 0;
+                    x--;
+                    clearScreen();
+                    print_maze(maze);
+                    return Solved;
                 }
                 break;
 
@@ -281,9 +326,17 @@ MenuState solve() {
                 if (x < maze[y].size()-1 && maze[y][x+1] == 0) { // move right
                     std::swap(maze[y][x+1], maze[y][x]);
                     x++;
+                    reRender = true;
+                }
+                else if (maze[y][x+1] == 3) {
+                    std::swap(maze[y][x+1], maze[y][x]);
+                    maze[y][x] = 0;
+                    x++;
+                    clearScreen();
+                    print_maze(maze);
+                    return Solved;
                 }
                 break;
-
             default:
                 break;
         }

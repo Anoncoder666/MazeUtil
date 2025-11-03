@@ -21,6 +21,7 @@ inline void setNonBlocking(bool enable) {
     static bool initialized = false;
     static termios oldt{};
     static int oldf = 0;
+
     if (!initialized) {
         tcgetattr(STDIN_FILENO, &oldt);
         initialized = true;
@@ -40,7 +41,8 @@ inline void setNonBlocking(bool enable) {
 
 inline bool keyPressed() {
     setNonBlocking(true);
-    if (const int ch = getchar(); ch != EOF) {
+    int ch = getchar();
+    if (ch != EOF) {
         ungetc(ch, stdin); // put character back
         setNonBlocking(false);
         return true;
@@ -60,5 +62,36 @@ inline char getKey() {
     setNonBlocking(false);
     return static_cast<char>(ch);
     }
+
+inline char getNormalizedKey() {
+#ifdef _WIN32
+    int ch = _getch();
+    if (ch == 224) { // arrow prefix on Windows
+        ch = _getch();
+        switch (ch) {
+            case 72: return 'w'; // Up
+            case 80: return 's'; // Down
+            case 75: return 'a'; // Left
+            case 77: return 'd'; // Right
+        }
+    }
+    return ch;
+#else
+    int ch = getKey(); // your blocking getKey()
+    if (ch == 27) { // ESC
+        int ch1 = getKey();
+        if (ch1 == '[') {
+            int ch2 = getKey();
+            switch (ch2) {
+                case 'A': return 'w'; // Up
+                case 'B': return 's'; // Down
+                case 'C': return 'd'; // Right
+                case 'D': return 'a'; // Left
+            }
+        }
+    }
+    return ch;
+#endif
+}
 
 #endif
