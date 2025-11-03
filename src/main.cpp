@@ -3,6 +3,7 @@
 using namespace std;
 
 int main() {
+    clearScreen();
     MenuState state = MainMenu;
     while (state != Exit) {
         switch (state) {

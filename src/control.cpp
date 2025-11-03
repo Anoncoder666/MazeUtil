@@ -185,25 +185,29 @@ MenuState color() {
     };
     const Menu menu(30,options, "Colors");
     menu.display();
-    switch (int output = Menu::getInput(4)) {
-        case 1: {
-            bgcolor = "\033[48;5;15m⠀⠀\033[0m";
-            cout << "Color set to white!" << endl;
-            break;
+    while (true) {
+        switch (int output = Menu::getInput(4)) {
+            case 1: {
+                bgcolor = "\033[48;5;15m⠀⠀\033[0m";
+                cout << "Color set to white!" << endl;
+                continue;
+            }
+            case 2: {
+                bgcolor = "\033[48;5;222m⠀⠀\033[0m";
+                cout << "Color set to sand!" << endl;
+                continue;
+            }
+            case 3: {
+                bgcolor = "\033[48;5;253m⠀⠀\033[0m";
+                cout << "Color set to grey!" << endl;
+                continue;
+            }
+            default: {
+                clearScreen();
+                return Settings;
+            }
         }
-        case 2: {
-            bgcolor = "\033[48;5;222m⠀⠀\033[0m";
-            cout << "Color set to sand!" << endl;
-            break;
-        }
-        case 3: {
-            bgcolor = "\033[48;5;253m⠀⠀\033[0m";
-            cout << "Color set to grey!" << endl;
-            break;
-        }
-        default: return Settings;
     }
-    return Color;
 }
 
 int customintInput(const string& prompt, const string& errormsg, bool (*condition)(int)) {
