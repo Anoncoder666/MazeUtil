@@ -28,6 +28,7 @@ vector<vector<unsigned char>> maze_template(const int units_width, const int uni
     assert(units_width > 0 && units_height > 0);
     const int width = units_width*2 +1;
     const int height = units_height*2 +1;
+    maze.clear();
     maze.resize(height);
     for (int j = 0; j < height; j++) {
         maze[j].resize(width, 1);
