@@ -6,7 +6,7 @@
 using namespace std;
 extern string bgcolor;
 extern string fgcolor;
-enum MenuState { MainMenu, AlgorithmMenu, TessellationSize, Exit, Success, DFSSize,CustomDFSSize,WilsonSize, CustomWilsonSize, Settings, Color};
+enum MenuState { MainMenu, AlgorithmMenu, TessellationSize, Exit, Success, DFSSize,CustomDFSSize,WilsonSize, CustomWilsonSize, Settings, Color, Solve};
 MenuState mainmenu();
 MenuState prompt_algorithm();
 MenuState prompt_size_tessellation();
@@ -18,6 +18,7 @@ MenuState prompt_size_dfs();
 MenuState custom_size_dfs();
 MenuState prompt_size_wilson();
 MenuState custom_size_wilson();
+MenuState solve();
 void clearScreen();
 int customintInput(const string& prompt, const string& errormsg, bool (*condition)(int));
 string Line(const string& s, int width);

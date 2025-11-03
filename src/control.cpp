@@ -3,9 +3,13 @@
 #include "maze.h"
 #include "tessellate.h"
 #include "wilson.h"
+#include "keyboardInput.h"
+#include "render.h"
 
 using namespace std;
 extern vector<vector<unsigned char>> maze;
+extern pair<int, int> maze_in;
+extern pair<int, int> maze_out;
 void clearScreen() {
 #ifdef _WIN32
     system("cls");
@@ -75,7 +79,7 @@ MenuState prompt_size_dfs() {
         maze = maze_template(10*(size+1),10*(size+1));
         dfs(maze);
         carve_openings(maze);
-        print(maze);
+        print_maze(maze);
     }
     return end;
 }
@@ -101,7 +105,7 @@ MenuState custom_size_dfs() {
     maze = maze_template(width,height);
     dfs(maze);
     carve_openings(maze);
-    print(maze);
+    print_maze(maze);
     return Success;
 }
 
@@ -121,7 +125,7 @@ MenuState prompt_size_wilson() {
         vector<vector<unsigned char>> v = maze_template(10*(size+1),10*(size+1));
         wilson(v);
         carve_openings(v);
-        print(v);
+        print_maze(v);
     }
     return end;
 }
@@ -150,6 +154,7 @@ MenuState custom_size_wilson() {
 MenuState success() {
     cout << "Your maze was successfully generated!" << endl;
     const vector<Option> options = {
+        {"Solve Generated Maze", Solve},
             {"Generate New Maze", AlgorithmMenu},
             {"Return to Main Menu", MainMenu},
             {"Exit", Exit}
@@ -232,6 +237,58 @@ int customintInput(const string& prompt, const string& errormsg, bool (*conditio
         break;
     }
     return choice;
+}
+
+MenuState solve() {
+
+    std::pair<int,int> location = maze_in;
+    std::pair<int,int> goal = maze_out;
+    auto& [y, x] = location; // structured binding references
+    maze[y][x] = 2;
+    maze[goal.first][goal.second] = 3;
+
+    while (location != goal) {
+        clearScreen();
+        cout << flush;
+        print_maze(maze);
+        switch (char move = getKey()) {
+            case 'w':
+            case 'W':
+                if (y > 0 && maze[y-1][x] == 0) { // move up
+                    std::swap(maze[y-1][x], maze[y][x]);
+                    y--;
+                }
+                break;
+
+            case 's':
+            case 'S':
+                if (y < maze.size()-1 && maze[y+1][x] == 0) { // move down
+                    std::swap(maze[y+1][x], maze[y][x]);
+                    y++;
+                }
+                break;
+
+            case 'a':
+            case 'A':
+                if (x > 0 && maze[y][x-1] == 0) { // move left
+                    std::swap(maze[y][x-1], maze[y][x]);
+                    x--;
+                }
+                break;
+
+            case 'd':
+            case 'D':
+                if (x < maze[y].size()-1 && maze[y][x+1] == 0) { // move right
+                    std::swap(maze[y][x+1], maze[y][x]);
+                    x++;
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+    return MainMenu;
 }
 
 string Line(const string& s, int width) {

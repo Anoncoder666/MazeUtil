@@ -1,27 +1,27 @@
 #include "../include/mazeutil/maze.h"
 #include "../include/mazeutil/rand.h"
 vector<vector<unsigned char>> maze;
-pair<int, int> in;
-pair<int, int> out;
+pair<int, int> maze_in;
+pair<int, int> maze_out;
 void carve_openings(vector<vector<unsigned char>> &v) {
     assert(!v.empty() && !v.front().empty());
     switch (rand_int(4)) {
-        case 1: in = {0, 1}; break;
-        case 2: in = {1, 0}; break;
-        case 3: in = {0, static_cast<int>(v[0].size()) - 2}; break;
-        case 4: in = {1, static_cast<int>(v[0].size()) - 1}; break;
-        default: in = {0, 0}; break;
+        case 1: maze_in = {0, 1}; break;
+        case 2: maze_in = {1, 0}; break;
+        case 3: maze_in = {0, static_cast<int>(v[0].size()) - 2}; break;
+        case 4: maze_in = {1, static_cast<int>(v[0].size()) - 1}; break;
+        default: maze_in = {0, 0}; break;
     }
     switch (rand_int(4)) {
-        case 1: out = {static_cast<int>(v.size()) - 1, 1}; break;
-        case 2: out = {static_cast<int>(v.size()) - 2, 0}; break;
-        case 3: out = {static_cast<int>(v.size()) - 1, static_cast<int>(v[0].size()) - 2}; break;
-        case 4: out = {static_cast<int>(v.size()) - 2, static_cast<int>(v[0].size()) - 1}; break;
-        default: out = {0, 0}; break;
+        case 1: maze_out = {static_cast<int>(v.size()) - 1, 1}; break;
+        case 2: maze_out = {static_cast<int>(v.size()) - 2, 0}; break;
+        case 3: maze_out = {static_cast<int>(v.size()) - 1, static_cast<int>(v[0].size()) - 2}; break;
+        case 4: maze_out = {static_cast<int>(v.size()) - 2, static_cast<int>(v[0].size()) - 1}; break;
+        default: maze_out = {0, 0}; break;
     }
 
-    v[in.first][in.second] = false;
-    v[out.first][out.second] = false;
+    v[maze_in.first][maze_in.second] = false;
+    v[maze_out.first][maze_out.second] = false;
 }
 
 vector<vector<unsigned char>> maze_template(const int units_width, const int units_height) {

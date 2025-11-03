@@ -17,7 +17,8 @@ add_library(MazeUtilLib ${SOURCES})
 target_include_directories(MazeUtilLib PUBLIC ${PROJECT_SOURCE_DIR}/include/mazeutil)
 
 add_executable(MazeUtil src/main.cpp
-        include/mazeutil/hash.h)
+        include/mazeutil/hash.h
+        include/mazeutil/keyboardInput.h)
 target_link_libraries(MazeUtil PRIVATE MazeUtilLib)
 
 if(MSVC)
