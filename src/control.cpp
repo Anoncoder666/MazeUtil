@@ -94,13 +94,13 @@ MenuState custom_size_dfs() {
     };
     const Menu menu(30, options);
     menu.display();
-    auto test = [](int a) { return a >= 1 && a <= 50; };
-    const int width = customintInput("Select maze width (2-50): ", "Please select a number 2-50", test);
+    auto test = [](int a) { return a >= 1 && a <= 100; };
+    const int width = customintInput("Select maze width (2-100): ", "Please select a number 2-100", test);
     if (width == 1) {
         clearScreen();
         return DFSSize;
     }
-    const int height = customintInput("Select maze height (2-50): ", "Please select a number 2-50", test);
+    const int height = customintInput("Select maze height (2-100): ", "Please select a number 2-100", test);
     if (height == 1) {
         clearScreen();
         return DFSSize;
@@ -141,13 +141,13 @@ MenuState custom_size_wilson() {
     };
     const Menu menu(30, options);
     menu.display();
-    auto test = [](int a) { return a >= 1 && a <= 50; };
-    int width = customintInput("Select maze width (2-50): ", "Please select a number 2-50", test);
+    auto test = [](int a) { return a >= 1 && a <= 100; };
+    int width = customintInput("Select maze width (2-100): ", "Please select a number 2-100", test);
     if (width == 1) {
         clearScreen();
         return DFSSize;
     }
-    int height = customintInput("Select maze height (2-50): ", "Please select a number 2-50", test);
+    int height = customintInput("Select maze height (2-100): ", "Please select a number 2-100", test);
     if (height == 1) {
         clearScreen();
         return DFSSize;
