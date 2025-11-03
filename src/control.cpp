@@ -152,7 +152,6 @@ MenuState custom_size_wilson() {
         return DFSSize;
     }
     clearScreen();
-    //template_for_wilson(width,height);
     return Success;
 }
 MenuState success() {
@@ -220,8 +219,8 @@ MenuState color() {
 }
 
 int customintInput(const string& prompt, const string& errormsg, bool (*condition)(int)) {
-    int choice;
     std::cout << "\033[?25h" << std::flush;
+    int choice;
     while (true) {
         cout << prompt;
         string line;
@@ -255,93 +254,93 @@ MenuState solved() {
     clearScreen();
     return end;
 }
+
 MenuState solve() {
     std::cout << "\033[?25l" << std::flush;
+
     std::pair<int,int> location = maze_in;
     std::pair<int,int> goal = maze_out;
-    auto& [y, x] = location; // structured binding references
-    maze[y][x] = 2;
-    maze[goal.first][goal.second] = 3;
-    bool reRender = true;
-    while (location != goal) {
-        if (reRender) {
-            std::cout << "\033[H";
-            print_maze(maze);
-            reRender = false;
+    auto& [player_y, player_x] = location;
+    auto& [goal_y, goal_x] = goal;
+
+    maze[player_y][player_x] = 2;
+    maze[goal_y][goal_x] = 3;
+
+    constexpr int viewport_height = 20;
+    constexpr int viewport_width  = 40;
+
+    bool running = true;
+    bool render = true;
+
+    const int visible_height = std::min(viewport_height, (int)maze.size());
+    const int visible_width  = std::min(viewport_width,  (int)maze[0].size());
+
+    std::vector view(
+        visible_height + 2,
+        std::vector<unsigned char>(visible_width + 2, 4)
+    );
+
+    while (running) {
+        int top = 0, left = 0;
+
+        if ((int)maze.size() > viewport_height)
+            top = std::max(0, player_y - viewport_height / 2);
+
+        if ((int)maze[0].size() > viewport_width)
+            left = std::max(0, player_x - viewport_width / 2);
+
+        // Clamp to maze bounds
+        if (top + viewport_height > (int)maze.size())
+            top = std::max(0, (int)maze.size() - viewport_height);
+        if (left + viewport_width > (int)maze[0].size())
+            left = std::max(0, (int)maze[0].size() - viewport_width);
+
+        for (int y = 0; y < visible_height; y++) {
+            for (int x = 0; x < visible_width; x++) {
+                view[y + 1][x + 1] = maze[top + y][left + x];
+            }
         }
-        switch (char move = getNormalizedKey()) {
-            case 'w':
-            case 'W':
-                if (y > 0 && maze[y-1][x] == 0) { // move up
-                    std::swap(maze[y-1][x], maze[y][x]);
-                    y--;
-                    reRender = true;
-                }
-                else if (maze[y-1][x] == 3) {
-                    std::swap(maze[y-1][x], maze[y][x]);
-                    maze[y][x] = 0;
-                    y--;
-                    std::cout << "\033[H";
-                    print_maze(maze);
-                    return Solved;
-                }
-                break;
 
-            case 's':
-            case 'S':
-                if (y < maze.size()-1 && maze[y+1][x] == 0) { // move down
-                    std::swap(maze[y+1][x], maze[y][x]);
-                    y++;
-                    reRender = true;
-                }
-                else if (maze[y+1][x] == 3) {
-                    std::swap(maze[y+1][x], maze[y][x]);
-                    maze[y][x] = 0;
-                    y++;
-                    std::cout << "\033[H";
-                    print_maze(maze);
-                    return Solved;
-                }
-                break;
+        if (render) {
+            clearScreen();
+            print_maze(view);
+            print_coordinates(player_x, maze.size() - player_y, goal_x, maze.size() - goal_y);
+            render = false;
+        }
 
-            case 'a':
-            case 'A':
-                if (x > 0 && maze[y][x-1] == 0) { // move left
-                    std::swap(maze[y][x-1], maze[y][x]);
-                    x--;
-                    reRender = true;
-                }
-                else if (maze[y][x-1] == 3) {
-                    std::swap(maze[y][x-1], maze[y][x]);
-                    maze[y][x] = 0;
-                    x--;
-                    std::cout << "\033[H";
-                    print_maze(maze);
-                    return Solved;
-                }
-                break;
+        char move = getNormalizedKey();
+        int new_y = player_y, new_x = player_x;
 
-            case 'd':
-            case 'D':
-                if (x < maze[y].size()-1 && maze[y][x+1] == 0) { // move right
-                    std::swap(maze[y][x+1], maze[y][x]);
-                    x++;
-                    reRender = true;
-                }
-                else if (maze[y][x+1] == 3) {
-                    std::swap(maze[y][x+1], maze[y][x]);
-                    maze[y][x] = 0;
-                    x++;
-                    std::cout << "\033[H" ;
-                    print_maze(maze);
-                    return Solved;
-                }
-                break;
+        switch (move) {
+            case 'w': case 'W': new_y--; break;
+            case 's': case 'S': new_y++; break;
+            case 'a': case 'A': new_x--; break;
+            case 'd': case 'D': new_x++; break;
             default: break;
+        }
+
+        if (new_y >= 0 && new_y < (int)maze.size() &&
+            new_x >= 0 && new_x < (int)maze[0].size()) {
+            if (maze[new_y][new_x] == 0) { // empty
+                render = true;
+                std::swap(maze[player_y][player_x], maze[new_y][new_x]);
+                player_y = new_y;
+                player_x = new_x;
+            } else if (maze[new_y][new_x] == 3) { // goal
+                maze[new_y][new_x] = 0;
+                std::swap(maze[player_y][player_x], maze[new_y][new_x]);
+                player_y = new_y;
+                player_x = new_x;
+                clearScreen();
+                print_maze(maze);
+                std::cout << "\nReached goal at (" << goal_x << ", " << goal_y << ")!\n";
+                return Solved;
+            }
         }
     }
     return MainMenu;
 }
+
 
 string Line(const string& s, int width) {
     string ss;
@@ -350,10 +349,10 @@ string Line(const string& s, int width) {
     }
     return ss;
 }
-//CLASS FUNCTIONS
 
+//CLASS FUNCTIONS
 void Menu::display () const {
-    if (this->title != "") {
+    if (!this->title.empty()) {
         cout << "┌" << Line("─", width) << "┐" << endl;
         cout << "│" << string((width - title.length()) / 2, ' ') << title << string((width - title.length() + 1) / 2, ' ') << "│" << endl;
         cout << "├" << Line("─", width) << "┤" << endl;
@@ -373,8 +372,8 @@ Menu::Menu(const int width, const vector<Option>& options, const char* title ) {
 }
 
 int Menu::getInput(int max) {
-    int choice;
     std::cout << "\033[?25h" << std::flush;
+    int choice;
     while (true) {
         cout << "Select option (" << 1 << "-" << max << "): ";
         string line;
@@ -397,11 +396,11 @@ int Menu::getInput(int max) {
     return choice;
 }
 
-MenuState Menu::run(int* n) const {
+MenuState Menu::run(int* a) const {
     display();
     const int index = getInput(options.size())-1;
-    if (n != nullptr) {
-        *n = index;
+    if (a != nullptr) {
+        *a = index;
     }
     return options[index].action;
 }
