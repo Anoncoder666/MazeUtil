@@ -221,6 +221,7 @@ MenuState color() {
 
 int customintInput(const string& prompt, const string& errormsg, bool (*condition)(int)) {
     int choice;
+    std::cout << "\033[?25h" << std::flush;
     while (true) {
         cout << prompt;
         string line;
@@ -255,7 +256,7 @@ MenuState solved() {
     return end;
 }
 MenuState solve() {
-
+    std::cout << "\033[?25l" << std::flush;
     std::pair<int,int> location = maze_in;
     std::pair<int,int> goal = maze_out;
     auto& [y, x] = location; // structured binding references
@@ -264,8 +265,7 @@ MenuState solve() {
     bool reRender = true;
     while (location != goal) {
         if (reRender) {
-            clearScreen();
-            cout << flush;
+            std::cout << "\033[H";
             print_maze(maze);
             reRender = false;
         }
@@ -281,7 +281,7 @@ MenuState solve() {
                     std::swap(maze[y-1][x], maze[y][x]);
                     maze[y][x] = 0;
                     y--;
-                    clearScreen();
+                    std::cout << "\033[H";
                     print_maze(maze);
                     return Solved;
                 }
@@ -298,7 +298,7 @@ MenuState solve() {
                     std::swap(maze[y+1][x], maze[y][x]);
                     maze[y][x] = 0;
                     y++;
-                    clearScreen();
+                    std::cout << "\033[H";
                     print_maze(maze);
                     return Solved;
                 }
@@ -315,7 +315,7 @@ MenuState solve() {
                     std::swap(maze[y][x-1], maze[y][x]);
                     maze[y][x] = 0;
                     x--;
-                    clearScreen();
+                    std::cout << "\033[H";
                     print_maze(maze);
                     return Solved;
                 }
@@ -332,13 +332,12 @@ MenuState solve() {
                     std::swap(maze[y][x+1], maze[y][x]);
                     maze[y][x] = 0;
                     x++;
-                    clearScreen();
+                    std::cout << "\033[H" ;
                     print_maze(maze);
                     return Solved;
                 }
                 break;
-            default:
-                break;
+            default: break;
         }
     }
     return MainMenu;
@@ -375,6 +374,7 @@ Menu::Menu(const int width, const vector<Option>& options, const char* title ) {
 
 int Menu::getInput(int max) {
     int choice;
+    std::cout << "\033[?25h" << std::flush;
     while (true) {
         cout << "Select option (" << 1 << "-" << max << "): ";
         string line;
