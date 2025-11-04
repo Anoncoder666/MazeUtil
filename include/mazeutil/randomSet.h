@@ -7,6 +7,15 @@
 
 // Generic RandomAccessSet supporting random O(1) insert/remove/getRandom
 // Works with custom hash functions (e.g., pair_hash for std::pair)
+struct pair_hash {
+    template <typename T1, typename T2>
+    std::size_t operator()(const std::pair<T1,T2>& p) const noexcept {
+        auto h1 = std::hash<T1>{}(p.first);
+        auto h2 = std::hash<T2>{}(p.second);
+        return h1 ^ (h2 << 1);
+    }
+};
+
 template<typename T, typename Hash = std::hash<T>>
 class RandomAccessSet {
     std::vector<T> items;

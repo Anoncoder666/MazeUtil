@@ -37,23 +37,29 @@ int main() {
             case AlgorithmMenu:
                 state = prompt_algorithm();
                 break;
+            case DFSSize:
+                state = prompt_size(DFS);
+                break;
+            case CustomDFSSize:
+                state = custom_size(DFS);
+                break;
+            case WilsonSize:
+                state = prompt_size(Wilson);
+                break;
+            case CustomWilsonSize:
+                state = custom_size(Wilson);
+                break;
+            case BFSSize:
+                state = prompt_size(BFS);
+                break;
+            case CustomBFSSize:
+                state = custom_size(BFS);
+                break;
             case TessellationSize:
-                state = prompt_size_tessellation();
+                state = prompt_size(Tessellation);
                 break;
             case Success:
                 state = success();
-                break;
-            case DFSSize:
-                state = prompt_size_dfs();
-                break;
-            case CustomDFSSize:
-                state = custom_size_dfs();
-                break;
-            case WilsonSize:
-                state = prompt_size_wilson();
-                break;
-            case CustomWilsonSize:
-                state = custom_size_wilson();
                 break;
             case Settings:
                 state = settings();

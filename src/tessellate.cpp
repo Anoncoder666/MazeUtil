@@ -57,5 +57,4 @@ void tessellate(const int size) {
         carve_internal_paths(maze, i);
     }
     carve_openings(maze);
-    print_maze(maze);
 }

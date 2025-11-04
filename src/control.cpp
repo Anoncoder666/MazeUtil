@@ -1,5 +1,6 @@
 #include "control.h"
 #include "dfs.h"
+#include "bfs.h"
 #include "game.h"
 #include "maze.h"
 #include "tessellate.h"
@@ -36,6 +37,7 @@ MenuState prompt_algorithm() {
     const vector<Option> options = {
         {"Randomized DFS", DFSSize},
         { "Wilson's Algorithm", WilsonSize},
+        {"Randomized BFS", BFSSize},
         {"Tessellation", TessellationSize},
         {"Go Back", MainMenu}
     };
@@ -45,33 +47,28 @@ MenuState prompt_algorithm() {
     return end;
 }
 
-MenuState prompt_size_tessellation() {
-    const vector<Option> options = {
-        {"2x2", Success},
-        {"4x4", Success},
-        {"8x8", Success},
-        {"16x16", Success},
-        {"32x32", Success},
-        {"Go Back", AlgorithmMenu}
-    };
-    const Menu menu(30,options, "Choose a size");
-    int size = 0;
-    const MenuState end = menu.run(&size);
-    clearScreen();
-    if (end == Success) {
-        tessellate(size+1);
+MenuState prompt_size(Algorithm algorithm) {
+    vector<Option> options;
+    switch (algorithm) {
+        case Tessellation:
+            options = {
+            {"2x2", Success},
+            {"4x4", Success},
+            {"8x8", Success},
+            {"16x16", Success},
+            {"32x32", Success},
+            {"Go Back", AlgorithmMenu}
+            };
+            break;
+        default:
+            options = {
+            {"10x10", Success},
+            {"20x20", Success},
+            {"30x30", Success},
+            {"Custom", CustomDFSSize},
+            {"Go Back", AlgorithmMenu}
+            };
     }
-    return end;
-}
-
-MenuState prompt_size_dfs() {
-    const vector<Option> options = {
-        {"10x10", Success},
-        {"20x20", Success},
-        {"30x30", Success},
-        {"Custom", CustomDFSSize},
-        {"Go Back", AlgorithmMenu}
-    };
     const Menu menu(30,options, "Choose a size");
     int size = 0;
     const MenuState end = menu.run(&size);
@@ -79,8 +76,13 @@ MenuState prompt_size_dfs() {
     if (end == Success) {
 
         maze = maze_template(10*(size+1),10*(size+1));
-        dfs(maze);
-
+        switch (algorithm) {
+            case DFS: dfs(maze); break;
+            case Wilson: wilson(maze); break;
+            case BFS: bfs(maze); break;
+            case Tessellation: tessellate(size + 1); break;
+            default: ;
+        }
         carve_openings(maze);
         print_maze(maze);
     }
@@ -88,7 +90,7 @@ MenuState prompt_size_dfs() {
     return end;
 }
 
-MenuState custom_size_dfs() {
+MenuState custom_size(Algorithm algorithm) {
     const vector<Option> options = {
         {"Go Back", AlgorithmMenu}
     };
@@ -98,12 +100,22 @@ MenuState custom_size_dfs() {
     const int width = customintInput("Select maze width (2-100): ", "Please select a number 2-100", test);
     if (width == 1) {
         clearScreen();
-        return DFSSize;
+        switch (algorithm) {
+            case DFS: return DFSSize; break;
+            case Wilson: return WilsonSize; break;
+            case BFS: return BFSSize; break;
+            default: ;
+        }
     }
     const int height = customintInput("Select maze height (2-100): ", "Please select a number 2-100", test);
     if (height == 1) {
         clearScreen();
-        return DFSSize;
+        switch (algorithm) {
+            case DFS: return DFSSize; break;
+            case Wilson: return WilsonSize; break;
+            case BFS: return BFSSize; break;
+            default: ;
+        }
     }
     clearScreen();
     maze = maze_template(width,height);
@@ -113,48 +125,6 @@ MenuState custom_size_dfs() {
     return Success;
 }
 
-MenuState prompt_size_wilson() {
-
-    const vector<Option> options = {
-        {"10x10", Success},
-        {"20x20", Success},
-        {"30x30", Success},
-        {"Custom", CustomDFSSize},
-        {"Go Back", AlgorithmMenu}
-    };
-    const Menu menu(30,options, "Choose a size");
-    int size = 0;
-    const MenuState end = menu.run(&size);
-    clearScreen();
-    if (end == Success) {
-        maze = maze_template(10*(size+1),10*(size+1));
-        wilson(maze);
-        carve_openings(maze);
-        print_maze(maze);
-    }
-    return end;
-}
-
-MenuState custom_size_wilson() {
-    const vector<Option> options = {
-        {"Go Back", AlgorithmMenu}
-    };
-    const Menu menu(30, options);
-    menu.display();
-    auto test = [](int a) { return a >= 1 && a <= 100; };
-    int width = customintInput("Select maze width (2-100): ", "Please select a number 2-100", test);
-    if (width == 1) {
-        clearScreen();
-        return DFSSize;
-    }
-    int height = customintInput("Select maze height (2-100): ", "Please select a number 2-100", test);
-    if (height == 1) {
-        clearScreen();
-        return DFSSize;
-    }
-    clearScreen();
-    return Success;
-}
 MenuState success() {
     cout << "Your maze was successfully generated!" << endl;
     const vector<Option> options = {
