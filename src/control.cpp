@@ -83,7 +83,7 @@ MenuState prompt_size(Algorithm algorithm) {
         case Prim: second = "Prim"; break;
         case Kruskal: second = "Kruskal"; break;
     }
-    second = second + " Maze";
+    second += " Maze";
     const Menu menu(30,options, {second, "Choose a size"});
     int size = 0;
     const MenuState end = menu.run(&size);
@@ -111,7 +111,17 @@ MenuState custom_size(Algorithm algorithm) {
     const vector<Option> options = {
         {"Go Back", AlgorithmMenu}
     };
-    const Menu menu(30, options);
+    string title;
+    switch (algorithm) {
+        case Tessellation: title = "Tessellation"; break;
+        case DFS: title = "DFS"; break;
+        case Wilson: title = "Wilson"; break;
+        case BFS: title = "BFS"; break;
+        case Prim: title = "Prim"; break;
+        case Kruskal: title = "Kruskal"; break;
+    }
+    title += " Maze";
+    const Menu menu(30, options, {title});
     menu.display();
     auto test = [](const int a) { return a >= 1 && a <= 100; };
     const int width = customintInput("Select maze width (2-100): ", "Please select a number 2-100", test);
