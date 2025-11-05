@@ -6,8 +6,8 @@
 using namespace std;
 extern string bgcolor;
 extern string fgcolor;
-enum MenuState { MainMenu, AlgorithmMenu, TessellationSize, Exit, Success, DFSSize,CustomDFSSize, WilsonSize, CustomWilsonSize, BFSSize, CustomBFSSize, Settings, Color, Solve, Solved};
-enum Algorithm {BFS, DFS, Wilson, Tessellation};
+enum MenuState {MainMenu, AlgorithmMenu, TessellationSize, Exit, Success, DFSSize,CustomDFSSize, WilsonSize, CustomWilsonSize, BFSSize, CustomBFSSize, KruskalSize, CustomKruskalSize, PrimSize, CustomPrimSize, Settings, Color, Solve, Solved};
+enum Algorithm {BFS, DFS, Wilson, Kruskal, Prim, Tessellation};
 MenuState mainmenu();
 MenuState prompt_algorithm();
 MenuState exit();
@@ -29,7 +29,7 @@ struct Option {
 
 class Menu {
     int width = 30;
-    string title;
+    vector<string> title;
 public:
     vector<Option> options;
     void display() const;
@@ -44,7 +44,7 @@ public:
 
     void setwidth(const int &width);
 
-    Menu( int width, const vector<Option>& options = {}, const char* title = "");
+    Menu(int width, const vector<Option>& options, const vector<string> &title = {});
 };
 
 #endif //PROMPT_H

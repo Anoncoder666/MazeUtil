@@ -58,6 +58,18 @@ int main() {
             case TessellationSize:
                 state = prompt_size(Tessellation);
                 break;
+            case KruskalSize:
+                state = prompt_size(Kruskal);
+                break;
+            case CustomKruskalSize:
+                state = custom_size(Kruskal);
+                break;
+            case PrimSize:
+                state = prompt_size(Prim);
+                break;
+            case CustomPrimSize:
+                state = custom_size(Prim);
+                break;
             case Success:
                 state = success();
                 break;

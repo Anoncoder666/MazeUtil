@@ -22,6 +22,8 @@ add_executable(MazeUtil src/main.cpp
         include/mazeutil/game.h
         src/bfs.cpp
         include/mazeutil/bfs.h
+        include/mazeutil/kruskal.h
+        include/mazeutil/prim.h
 )
 target_link_libraries(MazeUtil PRIVATE MazeUtilLib)
 

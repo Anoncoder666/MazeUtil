@@ -6,6 +6,8 @@
 #include "tessellate.h"
 #include "wilson.h"
 #include "keyboardInput.h"
+#include "kruskal.h"
+#include "prim.h"
 #include "render.h"
 
 using namespace std;
@@ -27,7 +29,7 @@ MenuState mainmenu() {
         {"Settings", Settings},
         {"Exit", Exit}
     };
-    const Menu menu(30,options, "Welcome to MazeUtil!");
+    const Menu menu(30,options, {"Welcome to MazeUtil!"});
     const MenuState end = menu.run();
     clearScreen();
     return end;
@@ -37,11 +39,13 @@ MenuState prompt_algorithm() {
     const vector<Option> options = {
         {"Randomized DFS", DFSSize},
         { "Wilson's Algorithm", WilsonSize},
-        {"Randomized BFS", BFSSize},
+        {"Kruskal's Algorithm", KruskalSize},
+        {"Prim's Algorithm", PrimSize},
         {"Tessellation", TessellationSize},
+        {"Randomized BFS", BFSSize},
         {"Go Back", MainMenu}
     };
-    const Menu menu(30,options, "Choose an algorithm");
+    const Menu menu(30,options, {"Choose an algorithm", "(top algorithms are best)"});
     const MenuState end = menu.run();
     clearScreen();
     return end;
@@ -69,7 +73,18 @@ MenuState prompt_size(Algorithm algorithm) {
             {"Go Back", AlgorithmMenu}
             };
     }
-    const Menu menu(30,options, "Choose a size");
+
+    string second;
+    switch (algorithm) {
+        case Tessellation: second = "Tessellation"; break;
+        case DFS: second = "DFS"; break;
+        case Wilson: second = "Wilson"; break;
+        case BFS: second = "BFS"; break;
+        case Prim: second = "Prim"; break;
+        case Kruskal: second = "Kruskal"; break;
+    }
+    second = second + " Maze";
+    const Menu menu(30,options, {second, "Choose a size"});
     int size = 0;
     const MenuState end = menu.run(&size);
     clearScreen();
@@ -81,6 +96,8 @@ MenuState prompt_size(Algorithm algorithm) {
             case Wilson: wilson(maze); break;
             case BFS: bfs(maze); break;
             case Tessellation: tessellate(size + 1); break;
+            case Kruskal: kruskal(maze); break;
+            case Prim: prim(maze); break;
             default: ;
         }
         carve_openings(maze);
@@ -96,14 +113,16 @@ MenuState custom_size(Algorithm algorithm) {
     };
     const Menu menu(30, options);
     menu.display();
-    auto test = [](int a) { return a >= 1 && a <= 100; };
+    auto test = [](const int a) { return a >= 1 && a <= 100; };
     const int width = customintInput("Select maze width (2-100): ", "Please select a number 2-100", test);
     if (width == 1) {
         clearScreen();
         switch (algorithm) {
-            case DFS: return DFSSize; break;
-            case Wilson: return WilsonSize; break;
-            case BFS: return BFSSize; break;
+            case DFS: return DFSSize;
+            case Wilson: return WilsonSize;
+            case BFS: return BFSSize;
+            case Kruskal: return KruskalSize;
+            case Prim: return PrimSize;
             default: ;
         }
     }
@@ -111,15 +130,24 @@ MenuState custom_size(Algorithm algorithm) {
     if (height == 1) {
         clearScreen();
         switch (algorithm) {
-            case DFS: return DFSSize; break;
-            case Wilson: return WilsonSize; break;
-            case BFS: return BFSSize; break;
+            case DFS: return DFSSize;
+            case Wilson: return WilsonSize;
+            case BFS: return BFSSize;
+            case Kruskal: return KruskalSize;
+            case Prim: return PrimSize;
             default: ;
         }
     }
     clearScreen();
     maze = maze_template(width,height);
-    dfs(maze);
+    switch (algorithm) {
+        case DFS: dfs(maze); break;
+        case Wilson: wilson(maze); break;
+        case BFS: bfs(maze); break;
+        case Kruskal: kruskal(maze); break;
+        case Prim: prim(maze); break;
+        default: ;
+    }
     carve_openings(maze);
     print_maze(maze);
     return Success;
@@ -144,7 +172,7 @@ MenuState settings() {
         {"Color", Color},
         {"Go Back", MainMenu}
     };
-    const Menu menu = {30, options, "Settings"};
+    const Menu menu = {30, options, {"Settings"}};
     const MenuState end = menu.run();
     clearScreen();
     return end;
@@ -162,10 +190,10 @@ MenuState color() {
         {"Grey", Color},
         {"Go Back", Settings}
     };
-    const Menu menu(30,options, "Colors");
+    const Menu menu(30,options, {"Colors"});
     menu.display();
     while (true) {
-        switch (int output = Menu::getInput(4)) {
+        switch (Menu::getInput(4)) {
             case 1: {
                 bgcolor = "\033[48;5;15m⠀⠀\033[0m";
                 cout << "Color set to white!" << endl;
@@ -244,7 +272,9 @@ string Line(const string& s, int width) {
 void Menu::display () const {
     if (!this->title.empty()) {
         cout << "┌" << Line("─", width) << "┐" << endl;
-        cout << "│" << string((width - title.length()) / 2, ' ') << title << string((width - title.length() + 1) / 2, ' ') << "│" << endl;
+        for (auto line: title) {
+            cout << "│" << string((width - line.length()) / 2, ' ') << line << string((width - line.length() + 1) / 2, ' ') << "│" << endl;
+        }
         cout << "├" << Line("─", width) << "┤" << endl;
     }
     else cout << "┌"<< Line("─", width) <<"┐" << endl;
@@ -255,7 +285,7 @@ void Menu::display () const {
     cout << "└" << Line("─", width) << "┘" << endl;
 }
 
-Menu::Menu(const int width, const vector<Option>& options, const char* title ) {
+Menu::Menu(const int width, const vector<Option>& options, const vector<string> &title) {
     this->title = title;
     this->width = width;
     this->options = options;
