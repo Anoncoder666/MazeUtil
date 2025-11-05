@@ -1,58 +1,80 @@
-#include "prim.h"
-#include <cassert>
-#include <random>
+#include <algorithm>
+#include<rand.h>
+#include<prim.h>
+using namespace std;
 
-#include "rand.h"
+// Directions
+constexpr int DX[4] = { -1, 1, 0, 0 };
+constexpr int DY[4] = { 0, 0, -1, 1 };
 
-extern std::mt19937 rng;
-
-struct Wall {
-    int wx, wy;
-    int cx, cy;
+struct Frontier {
+    int fx, fy; // frontier cell (2 away)
+    int wx, wy; // wall cell between it and the maze
 };
 
-static bool in_bounds(const std::vector<std::vector<unsigned char>> &maze, int x, int y) {
-    return y >= 0 && y < (int)maze.size() && x >= 0 && x < (int)maze[0].size();
+bool inBounds(int x, int y, int h, int w) {
+    return x > 0 && y > 0 && x < h - 1 && y < w - 1;
 }
 
-static void add_walls(const std::vector<std::vector<unsigned char>> &maze, int x, int y, std::vector<Wall> &walls) {
-    int h = (int)maze.size();
-    int w = (int)maze[0].size();
-
-    if (y - 2 > 0 && maze[y - 2][x] == 1) walls.push_back({x, y - 1, x, y - 2});
-    if (y + 2 < h && maze[y + 2][x] == 1) walls.push_back({x, y + 1, x, y + 2});
-    if (x - 2 > 0 && maze[y][x - 2] == 1) walls.push_back({x - 1, y, x - 2, y});
-    if (x + 2 < w && maze[y][x + 2] == 1) walls.push_back({x + 1, y, x + 2, y});
+// Utility: get a random *odd* coordinate inside bounds
+int rand_odd(int limit) {
+    int val = rand_int(limit / 2); // 1..limit/2
+    return val * 2 - 1;            // 1,3,5,...
 }
 
-void prim(std::vector<std::vector<unsigned char>> &maze) {
-    assert(!maze.empty() && !maze.front().empty());
-    int h = (int)maze.size();
-    int w = (int)maze[0].size();
+void prim(vector<vector<unsigned char>>& maze) {
+    int h = maze.size(), w = maze[0].size();
 
-    for (auto &row : maze) std::fill(row.begin(), row.end(), 1);
+    // Choose random odd start cell
+    int startX = rand_odd(h);
+    int startY = rand_odd(w);
+    maze[startX][startY] = 0;
 
-    if (h < 3 || w < 3) return;
+    vector<Frontier> frontierList;
 
-    const int sx = rand_int((w - 1) / 2) * 2 - 1;
-    const int sy = rand_int((h - 1) / 2) * 2 - 1;
+    auto addFrontier = [&](int fx, int fy, int wx, int wy) {
+        if (inBounds(fx, fy, h, w) && maze[fx][fy] == 1) {
+            bool exists = ranges::any_of(frontierList,[&](const Frontier& f){ return f.fx == fx && f.fy == fy; });
+            if (!exists)
+                frontierList.push_back({fx, fy, wx, wy});
+        }
+    };
 
-    maze[sy][sx] = 0;
+    // Add initial frontier cells (2 steps away)
+    for (int d = 0; d < 4; ++d) {
+        int fx = startX + 2 * DX[d];
+        int fy = startY + 2 * DY[d];
+        int wx = startX + DX[d];
+        int wy = startY + DY[d];
+        addFrontier(fx, fy, wx, wy);
+    }
 
-    std::vector<Wall> walls;
-    add_walls(maze, sx, sy, walls);
+    while (!frontierList.empty()) {
+        int idx = rand_int(frontierList.size()) - 1; // rand_int is 1-based
+        Frontier f = frontierList[idx];
 
-    while (!walls.empty()) {
-        std::uniform_int_distribution<int> pick(0, (int)walls.size() - 1);
-        int idx = pick(rng);
-        Wall w = walls[idx];
-        walls.erase(walls.begin() + idx);
+        // Remove all duplicates of this frontier cell
+        frontierList.erase(
+            remove_if(frontierList.begin(), frontierList.end(),
+                      [&](const Frontier& other){
+                          return other.fx == f.fx && other.fy == f.fy;
+                      }),
+            frontierList.end()
+        );
 
-        if (in_bounds(maze, w.cx, w.cy) && maze[w.cy][w.cx] == 1) {
-            maze[w.wy][w.wx] = 0;
-            maze[w.cy][w.cx] = 0;
+        // Carve passage and connecting wall
+        if (maze[f.fx][f.fy] == 1) {
+            maze[f.fx][f.fy] = 0;
+            maze[f.wx][f.wy] = 0;
 
-            add_walls(maze, w.cx, w.cy, walls);
+            // Add new frontier cells
+            for (int d = 0; d < 4; ++d) {
+                int fx = f.fx + 2 * DX[d];
+                int fy = f.fy + 2 * DY[d];
+                int wx = f.fx + DX[d];
+                int wy = f.fy + DY[d];
+                addFrontier(fx, fy, wx, wy);
+            }
         }
     }
 }
