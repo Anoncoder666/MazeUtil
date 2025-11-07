@@ -23,6 +23,8 @@ using namespace std;
 int main() {
     clearScreen();
 #ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
     SetConsoleCtrlHandler(consoleHandler, TRUE);
 #else
     signal(SIGHUP, handle_signal);
