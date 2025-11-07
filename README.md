@@ -1,0 +1,1 @@
+Simple maze utility. Generates mazes in the command line with a choice of multiple algorithms, allowing you to solve it like a game.
