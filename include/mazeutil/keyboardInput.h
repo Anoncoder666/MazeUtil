@@ -9,24 +9,10 @@ inline bool keyPressed() {
 }
 
 inline char getKey() {
-    return _getch(); // blocking key read
+    return _getch(); // non-blocking key read, no echo
 }
 
-inline char getNormalizedKey() {
-    int ch = _getch();
-    if (ch == 224) { // arrow prefix on Windows
-        ch = _getch();
-        switch (ch) {
-            case 72: return 'w'; // Up
-            case 80: return 's'; // Down
-            case 75: return 'a'; // Left
-            case 77: return 'd'; // Right
-        }
-    }
-    return static_cast<char>(ch);
-}
-
-#else // Linux/Unix
+#else
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -38,46 +24,61 @@ inline void setNonBlocking(bool enable) {
 
     if (!initialized) {
         tcgetattr(STDIN_FILENO, &oldt);
-        oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
         initialized = true;
     }
 
     termios newt = oldt;
     if (enable) {
-        newt.c_lflag &= ~(ICANON | ECHO);
+        newt.c_lflag &= ~(ICANON | ECHO); // disable line buffering and echo
         tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+        oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
         fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
     } else {
         tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
         fcntl(STDIN_FILENO, F_SETFL, oldf);
     }
-}
+    }
 
 inline bool keyPressed() {
     setNonBlocking(true);
     int ch = getchar();
     if (ch != EOF) {
-        ungetc(ch, stdin);
+        ungetc(ch, stdin); // put character back
         setNonBlocking(false);
         return true;
     }
+
     setNonBlocking(false);
     return false;
-}
+    }
 
 inline char getKey() {
     setNonBlocking(true);
     int ch = getchar();
-    while (ch == EOF) { // wait for input
+    while (ch == EOF) { // wait until key is pressed
         ch = getchar();
     }
+
     setNonBlocking(false);
     return static_cast<char>(ch);
-}
+    }
 
 inline char getNormalizedKey() {
-    int ch = getKey();
-    if (ch == 27) { // ESC sequence for arrow keys
+#ifdef _WIN32
+    int ch = _getch();
+    if (ch == 224) { // arrow prefix on Windows
+        ch = _getch();
+        switch (ch) {
+            case 72: return 'w'; // Up
+            case 80: return 's'; // Down
+            case 75: return 'a'; // Left
+            case 77: return 'd'; // Right
+        }
+    }
+    return ch;
+#else
+    int ch = getKey(); // your blocking getKey()
+    if (ch == 27) { // ESC
         int ch1 = getKey();
         if (ch1 == '[') {
             int ch2 = getKey();
@@ -89,6 +90,8 @@ inline char getNormalizedKey() {
             }
         }
     }
-    return static_cast<char>(ch);
+    return ch;
+#endif
 }
+
 #endif

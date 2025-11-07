@@ -1,18 +1,32 @@
 #include <iostream>
 #include "control.h"
-#include "main.h"
+
+#ifdef _WIN32
+#include <windows.h>
+BOOL WINAPI consoleHandler(DWORD signal) {
+    if (signal == CTRL_CLOSE_EVENT || signal == CTRL_C_EVENT) {
+        std::cout << "Console closing or Ctrl+C pressed. Exiting cleanly...\n";
+        std::exit(0);
+    }
+    return TRUE;
+}
+#else
+#include <csignal>
+void handle_signal(int sig) {
+    std::cout << "Caught signal " << sig << ", exiting...\n";
+    std::exit(0);
+}
+#endif
 
 using namespace std;
 
 int main() {
     clearScreen();
 #ifdef _WIN32
-    SetConsoleOutputCP(CP_UTF8);
     SetConsoleCtrlHandler(consoleHandler, TRUE);
 #else
     signal(SIGHUP, handle_signal);
     signal(SIGINT, handle_signal);
-
 #endif
     MenuState state = MainMenu;
     while (state != Exit) {
@@ -70,9 +84,6 @@ int main() {
                 break;
             case Solved:
                 state = solved();
-                break;
-            case Exit:
-                state = Exit;
                 break;
         }
     }
