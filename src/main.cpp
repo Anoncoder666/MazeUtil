@@ -1,8 +1,8 @@
-#include <iostream>
-#include "control.h"
-
 #ifdef _WIN32
 #include <windows.h>
+#undef byte
+#include <iostream>
+
 BOOL WINAPI consoleHandler(DWORD signal) {
     if (signal == CTRL_CLOSE_EVENT || signal == CTRL_C_EVENT) {
         std::cout << "Console closing or Ctrl+C pressed. Exiting cleanly...\n";
@@ -12,11 +12,14 @@ BOOL WINAPI consoleHandler(DWORD signal) {
 }
 #else
 #include <csignal>
+#include <iostream>
 void handle_signal(int sig) {
     std::cout << "Caught signal " << sig << ", exiting...\n";
     std::exit(0);
 }
 #endif
+
+#include "control.h"
 
 using namespace std;
 
