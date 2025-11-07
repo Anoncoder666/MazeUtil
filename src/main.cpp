@@ -23,10 +23,12 @@ using namespace std;
 int main() {
     clearScreen();
 #ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
     SetConsoleCtrlHandler(consoleHandler, TRUE);
 #else
     signal(SIGHUP, handle_signal);
     signal(SIGINT, handle_signal);
+
 #endif
     MenuState state = MainMenu;
     while (state != Exit) {
